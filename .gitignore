@@ -1,3 +1,6 @@
 infra/.terraform
 .trunk
 .genaiscript
+
+# macOS
+.DS_Store
