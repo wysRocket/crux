@@ -1,24 +1,23 @@
-import React from "react";
-import { View, Pressable, StyleSheet, Dimensions } from "react-native";
-import { Tabs } from "expo-router";
-import { Home, Folder, Plus, Edit2, User } from "lucide-react-native";
+import {View, Pressable, StyleSheet, Dimensions} from 'react-native';
+import {Tabs} from 'expo-router';
+import {Home, Folder, Plus, Edit2, User} from 'lucide-react-native';
 
-const { width } = Dimensions.get("window");
+const {width} = Dimensions.get('window');
 const TAB_BAR_WIDTH = width * 0.8; // 90% of screen width
 
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
 
-function CustomTabBar({ state, navigation, descriptors }: BottomTabBarProps) {
+function CustomTabBar({state, navigation, descriptors}: BottomTabBarProps) {
   return (
     <View style={styles.tabBarWrapper}>
       <View style={styles.tabBar}>
         {state.routes.map((route, index) => {
-          const { options } = descriptors[route.key];
+          const {options} = descriptors[route.key];
           const isFocused = state.index === index;
 
           const onPress = () => {
             const event = navigation.emit({
-              type: "tabPress",
+              type: 'tabPress',
               target: route.key,
               canPreventDefault: true,
             });
@@ -31,25 +30,25 @@ function CustomTabBar({ state, navigation, descriptors }: BottomTabBarProps) {
           // Determine the icon based on the route name
           let Icon = Home;
           switch (route.name) {
-            case "home":
+            case 'home':
               Icon = Home;
               break;
-            case "folders":
+            case 'folders':
               Icon = Folder;
               break;
-            case "add":
+            case 'add':
               Icon = Plus;
               break;
-            case "edit":
+            case 'edit':
               Icon = Edit2;
               break;
-            case "profile":
+            case 'profile':
               Icon = User;
               break;
           }
 
           // Special styling for the add button
-          if (route.name === "add") {
+          if (route.name === 'add') {
             return (
               <Pressable
                 key={route.key}
@@ -65,7 +64,7 @@ function CustomTabBar({ state, navigation, descriptors }: BottomTabBarProps) {
             <Pressable key={route.key} onPress={onPress} style={styles.tab}>
               <Icon
                 size={24}
-                color={isFocused ? "#fff" : "rgba(255, 255, 255, 0.5)"}
+                color={isFocused ? '#fff' : 'rgba(255, 255, 255, 0.5)'}
               />
             </Pressable>
           );
@@ -94,24 +93,24 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   tabBarWrapper: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    alignItems: "center",
+    alignItems: 'center',
     paddingBottom: 24,
     paddingHorizontal: 20,
   },
   tabBar: {
     width: TAB_BAR_WIDTH,
     height: 64,
-    backgroundColor: "#4A55A2",
+    backgroundColor: '#4A55A2',
     borderRadius: 32,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
     paddingHorizontal: 16,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 4,
@@ -122,19 +121,19 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    height: "100%",
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
   },
   addButton: {
     width: 48,
     height: 48,
-    backgroundColor: "#FF4081",
+    backgroundColor: '#F3F4F6',
     borderRadius: 24,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     marginTop: -24,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 4,

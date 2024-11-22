@@ -10,21 +10,12 @@ import {
 } from 'react-native';
 import {Plus, ChevronRight} from 'lucide-react-native';
 import Header from '@/components/Header';
+import HorizontalAccordion from '@/components/horizontal-accordion';
 
 const {width} = Dimensions.get('window');
 const CARD_WIDTH = (width - 48) / 2;
 
 export default function HomeScreen() {
-  const cameraRoll = [
-    {
-      id: 1,
-      date: 'Jan 3, 2022',
-      image: '/placeholder.svg?height=200&width=300',
-    },
-    {id: 2, image: '/placeholder.svg?height=80&width=40'},
-    {id: 3, image: '/placeholder.svg?height=80&width=40'},
-  ];
-
   const folders = [
     {
       id: 1,
@@ -107,28 +98,7 @@ export default function HomeScreen() {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.sectionTitle}>Camera roll</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.cameraRoll}
-        >
-          {cameraRoll.map((item, index) => (
-            <View
-              key={item.id}
-              style={[styles.photoCard, index === 0 && styles.mainPhotoCard]}
-            >
-              <Image source={{uri: item.image}} style={styles.photo} />
-              {index === 0 && (
-                <View style={styles.dateOverlay}>
-                  <Text style={styles.dateText}>{item.date}</Text>
-                  <TouchableOpacity style={styles.addButton}>
-                    <Plus size={20} color="#000" />
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          ))}
-        </ScrollView>
+        <HorizontalAccordion />
 
         <Text style={styles.sectionTitle}>Legacy folders</Text>
         <View style={styles.folderGrid}>{folders.map(renderFolderCard)}</View>
