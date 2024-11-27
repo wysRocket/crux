@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,9 @@ import {
   Pressable,
   StyleSheet,
   ScrollView,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { ArrowLeft, ChevronDown, X } from "lucide-react-native";
+} from 'react-native';
+import {useRouter} from 'expo-router';
+import {ArrowLeft, ChevronDown, X} from 'lucide-react-native';
 
 type Nominee = {
   email: string;
@@ -19,15 +19,15 @@ type Nominee = {
 export default function Nominees() {
   const router = useRouter();
   const [nominees, setNominees] = useState<Nominee[]>([
-    { email: "mom@mail.com", relationship: "Mom", color: "#E3F2FD" },
-    { email: "max@mail.com", relationship: "Friend", color: "#FCE4EC" },
-    { email: "johny@mail.com", relationship: "Brother", color: "#E8F5E9" },
+    {email: 'mom@mail.com', relationship: 'Mom', color: '#E3F2FD'},
+    {email: 'max@mail.com', relationship: 'Friend', color: '#FCE4EC'},
+    {email: 'johny@mail.com', relationship: 'Brother', color: '#E8F5E9'},
   ]);
-  const [newEmail, setNewEmail] = useState("");
-  const [newRelationship, setNewRelationship] = useState("Friend");
+  const [newEmail, setNewEmail] = useState('');
+  const [newRelationship, setNewRelationship] = useState('Friend');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const relationships = ["Friend", "Mom", "Dad", "Brother", "Sister"];
+  const relationships = ['Friend', 'Mom', 'Dad', 'Brother', 'Sister'];
 
   const removeNominee = (email: string) => {
     setNominees(nominees.filter((nominee) => nominee.email !== email));
@@ -35,14 +35,14 @@ export default function Nominees() {
 
   const getRelationshipColor = (relationship: string) => {
     switch (relationship) {
-      case "Mom":
-        return "#E3F2FD";
-      case "Friend":
-        return "#FCE4EC";
-      case "Brother":
-        return "#E8F5E9";
+      case 'Mom':
+        return '#E3F2FD';
+      case 'Friend':
+        return '#FCE4EC';
+      case 'Brother':
+        return '#E8F5E9';
       default:
-        return "#F5F5F5";
+        return '#F5F5F5';
     }
   };
 
@@ -111,7 +111,7 @@ export default function Nominees() {
           {nominees.map((nominee, index) => (
             <View
               key={index}
-              style={[styles.inviteItem, { backgroundColor: nominee.color }]}
+              style={[styles.inviteItem, {backgroundColor: nominee.color}]}
             >
               <Text style={styles.inviteEmail}>{nominee.email}</Text>
               <View style={styles.inviteActions}>
@@ -134,12 +134,12 @@ export default function Nominees() {
 
       <Pressable
         style={styles.nextButton}
-        onPress={() => router.push("/allset")}
+        onPress={() => router.push('/allset')}
       >
         <ArrowLeft
           size={24}
           color="#fff"
-          style={{ transform: [{ rotate: "180deg" }] }}
+          style={{transform: [{rotate: '180deg'}]}}
         />
       </Pressable>
     </View>
@@ -149,17 +149,17 @@ export default function Nominees() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 20,
     paddingTop: 40,
   },
   progress: {
-    color: "#666",
+    color: '#666',
   },
   content: {
     flex: 1,
@@ -167,18 +167,18 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: "#666",
+    color: '#666',
     marginBottom: 32,
     lineHeight: 24,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: '600',
     marginBottom: 16,
   },
   form: {
@@ -187,47 +187,47 @@ const styles = StyleSheet.create({
   nameInput: {
     height: 50,
     borderRadius: 25,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: '#F5F5F5',
     paddingHorizontal: 20,
     fontSize: 16,
     marginBottom: 12,
   },
   row: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 12,
   },
   relationshipButton: {
     height: 50,
     borderRadius: 25,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: '#F5F5F5',
     paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
     flex: 1,
   },
   relationshipButtonText: {
     fontSize: 16,
-    color: "#000",
+    color: '#000',
   },
   emailInput: {
     height: 50,
     borderRadius: 25,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: '#F5F5F5',
     paddingHorizontal: 20,
     fontSize: 16,
     flex: 2,
   },
   dropdown: {
-    position: "absolute",
+    position: 'absolute',
     top: 110,
     left: 0,
-    right: "66%",
-    backgroundColor: "#fff",
+    right: '66%',
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
@@ -241,9 +241,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   inviteItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 16,
     borderRadius: 12,
   },
@@ -251,37 +251,37 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   inviteActions: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
   },
   relationshipTag: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
   },
   relationshipTagText: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   removeButton: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   nextButton: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 20,
     right: 20,
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#FF4081",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: '#FF4081',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

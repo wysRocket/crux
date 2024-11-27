@@ -1,197 +1,277 @@
-import {useEffect} from 'react';
-import {View, Text, Pressable, StyleSheet, Animated, Image} from 'react-native';
-import {useRouter} from 'expo-router';
-import {ArrowLeft, ArrowRight} from 'lucide-react-native';
+import {useEffect, useRef} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  Dimensions,
+  Image,
+} from 'react-native';
+import {ArrowRight} from 'react-native-feather';
+import Svg, {Path} from 'react-native-svg';
 
-type Nominee = {
-  id: string;
+const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+
+interface NomineeCardProps {
   name: string;
-  type: string;
-  avatar: string;
+  relation: string;
   color: string;
+  delay: number;
+  avatarUrl: string;
+  wavePattern: string;
+}
+
+const WaveBackground = ({color, pattern}: {color: string; pattern: string}) => (
+  <Svg
+    style={[StyleSheet.absoluteFill, {width: '100%', height: '100%'}]}
+    viewBox="0 0 1440 320"
+    preserveAspectRatio="none"
+  >
+    <Path d={pattern} fill={color} />
+  </Svg>
+);
+
+const NomineeCard = ({
+  name,
+  relation,
+  color,
+  delay,
+  avatarUrl,
+  wavePattern,
+}: NomineeCardProps) => {
+  const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.delay(delay),
+      Animated.parallel([
+        Animated.spring(translateY, {
+          toValue: 0,
+          damping: 15,
+          mass: 1,
+          stiffness: 130,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+  }, [delay]);
+
+  return (
+    <Animated.View
+      style={[
+        styles.nomineeCard,
+        {
+          transform: [{translateY}],
+          opacity,
+        },
+      ]}
+    >
+      <WaveBackground color={color} pattern={wavePattern} />
+      <View style={styles.nomineeContent}>
+        <View style={styles.leftContent}>
+          <Image
+            source={require('@/assets/images/profile-pic.png')}
+            style={styles.avatar}
+          />
+          <View style={styles.textContent}>
+            <Text style={styles.nomineeRelation}>{relation}</Text>
+            <Text style={styles.nomineeName}>{name}</Text>
+          </View>
+        </View>
+        <TouchableOpacity style={styles.arrowButton}>
+          <ArrowRight stroke="#000000" width={20} height={20} />
+        </TouchableOpacity>
+      </View>
+    </Animated.View>
+  );
 };
 
-export default function AllSet() {
-  const router = useRouter();
-  const nominees: Nominee[] = [
+const AllSet = () => {
+  const nominees = [
     {
-      id: '1',
       name: 'Johny',
-      type: 'Brother',
-      avatar: '@/assets/images/placeholder1.png',
-      color: '#E8F5E9',
+      relation: 'Brother',
+      color: '#BAFFC9',
+      delay: 0,
+      avatarUrl: '@/assets/images/placeholder1.png',
+      wavePattern:
+        'M0,32L48,37.3C96,43,192,53,288,80C384,107,480,149,576,160C672,171,768,149,864,133.3C960,117,1056,107,1152,101.3C1248,96,1344,96,1392,96L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z',
     },
     {
-      id: '2',
       name: 'Mom',
-      type: 'Mom',
-      avatar: '@/assets/images/placeholder1.png',
-      color: '#E3F2FD',
+      relation: 'Mom',
+      color: '#BAE1FF',
+      delay: 200,
+      avatarUrl: '@/assets/images/placeholder1.png',
+      wavePattern:
+        'M0,64L48,80C96,96,192,128,288,133.3C384,139,480,117,576,101.3C672,85,768,75,864,90.7C960,107,1056,149,1152,160C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z',
     },
     {
-      id: '3',
       name: 'Max',
-      type: 'Friend',
-      avatar: '@/assets/images/placeholder1.png',
-      color: '#FCE4EC',
+      relation: 'Friend',
+      color: '#FFB3BA',
+      delay: 400,
+      avatarUrl: '@/assets/images/placeholder1.png',
+      wavePattern:
+        'M0,96L48,112C96,128,192,160,288,176C384,192,480,192,576,176C672,160,768,128,864,117.3C960,107,1056,117,1152,122.7C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z',
     },
   ];
 
-  // Create animated values for each nominee
-  const animations = nominees.map(() => new Animated.Value(0));
+  const titleOpacity = useRef(new Animated.Value(0)).current;
+  const buttonOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Sequence the animations
-    const sequence = nominees.map((_, index) => {
-      return Animated.timing(animations[index], {
+    Animated.sequence([
+      Animated.timing(titleOpacity, {
         toValue: 1,
         duration: 500,
-        delay: index * 200, // Stagger the animations
         useNativeDriver: true,
-      });
-    });
-
-    // Start the sequence after a brief delay
-    setTimeout(() => {
-      Animated.sequence(sequence).start();
-    }, 500);
+      }),
+      Animated.delay(1200),
+      Animated.timing(buttonOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, []);
 
   return (
     <View style={styles.container}>
-      <Pressable style={styles.backButton} onPress={() => router.back()}>
-        <ArrowLeft size={24} color="#000" />
-      </Pressable>
-
-      <View style={styles.content}>
+      <Animated.View style={[styles.header, {opacity: titleOpacity}]}>
         <Text style={styles.title}>All set!</Text>
         <Text style={styles.subtitle}>
           We created folders for your nominees, you can start adding your files.
         </Text>
+      </Animated.View>
 
-        <View style={styles.cardsContainer}>
-          {nominees.map((nominee, index) => (
-            <Animated.View
-              key={nominee.id}
-              style={[
-                styles.card,
-                {backgroundColor: nominee.color},
-                {
-                  transform: [
-                    {
-                      translateY: animations[index].interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [100, 0],
-                      }),
-                    },
-                  ],
-                  opacity: animations[index],
-                },
-              ]}
-            >
-              <View style={styles.cardContent}>
-                <View>
-                  <Image
-                    source={require('@/assets/images/profile-pic.png')}
-                    style={styles.avatar}
-                  />
-                  <Text style={styles.cardType}>{nominee.type}</Text>
-                  <Text style={styles.cardName}>{nominee.name}</Text>
-                </View>
-                <Pressable style={styles.cardButton}>
-                  <ArrowRight size={20} color="#000" />
-                </Pressable>
-              </View>
-            </Animated.View>
-          ))}
-        </View>
-
-        <Pressable
-          style={styles.uploadButton}
-          onPress={() => router.push('/profile')}
-        >
-          <Text style={styles.uploadButtonText}>Upload files</Text>
-        </Pressable>
+      <View style={styles.cardsContainer}>
+        {nominees.map((nominee) => (
+          <NomineeCard key={nominee.name} {...nominee} />
+        ))}
       </View>
+
+      <Animated.View style={{opacity: buttonOpacity}}>
+        <TouchableOpacity style={styles.uploadButton}>
+          <Text style={styles.uploadButtonText}>Upload files</Text>
+        </TouchableOpacity>
+      </Animated.View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  backButton: {
+    backgroundColor: '#FFFFFF',
     padding: 20,
-    paddingTop: 40,
   },
-  content: {
-    flex: 1,
-    padding: 20,
-    alignItems: 'center',
+  header: {
+    marginTop: 40,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#666666',
     textAlign: 'center',
-    marginBottom: 40,
-    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   cardsContainer: {
-    width: '100%',
+    flex: 1,
+    justifyContent: 'center',
     gap: 16,
-    marginBottom: 40,
   },
-  card: {
+  nomineeCard: {
+    height: 100,
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    overflow: 'hidden',
+    position: 'relative',
   },
-  cardContent: {
+  nomineeContent: {
+    flex: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
   },
-  cardType: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
+  leftContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   avatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    marginRight: 12,
+    backgroundColor: '#FFFFFF',
   },
-  cardName: {
-    fontSize: 24,
-    fontWeight: '600',
+  textContent: {
+    gap: 4,
   },
-  cardButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
+  nomineeRelation: {
+    fontSize: 14,
+    color: '#666666',
+    textTransform: 'uppercase',
+    borderRadius: 18,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  nomineeName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  arrowButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   uploadButton: {
-    backgroundColor: '#FF4081',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
+    backgroundColor: '#FF69B4',
+    height: 50,
     borderRadius: 25,
-    marginTop: 'auto',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    shadowColor: '#000000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   uploadButtonText: {
-    color: 'white',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
 });
+
+export default AllSet;

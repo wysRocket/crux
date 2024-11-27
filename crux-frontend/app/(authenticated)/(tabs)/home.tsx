@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   View,
   Text,
@@ -7,10 +6,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import {Plus, ChevronRight} from 'lucide-react-native';
 import Header from '@/components/Header';
-import HorizontalAccordion from '@/components/horizontal-accordion';
+import {HorizontalAccordion} from '@/components/HorizontalAccordion';
+import {Card} from '@/components/Card';
 
 const {width} = Dimensions.get('window');
 const CARD_WIDTH = (width - 48) / 2;
@@ -68,94 +70,100 @@ export default function HomeScreen() {
     ],
   };
 
-  const renderFolderCard = (folder: (typeof folders)[0]) => (
-    <TouchableOpacity
-      key={folder.id}
-      style={[styles.folderCard, {backgroundColor: folder.color}]}
-    >
-      {folder.avatar ? (
-        <View style={styles.folderHeader}>
-          <Image
-            source={require('@/assets/images/profile-pic.png')}
-            style={styles.folderAvatar}
-          />
-          <Text style={styles.folderType}>{folder.type}</Text>
-        </View>
-      ) : (
-        <Text style={styles.folderType}>{folder.type}</Text>
-      )}
-      <View style={styles.folderInfo}>
-        <Text style={styles.folderName}>{folder.name}</Text>
-        <Text style={styles.folderCount}>{folder.photos} photos</Text>
-      </View>
-      <ChevronRight size={20} color="#000" style={styles.folderArrow} />
-    </TouchableOpacity>
-  );
+  const keyboardVerticalOffset = Platform.OS === 'ios' ? 80 : 0;
 
   return (
-    <View style={styles.container}>
-      <Header />
+    <KeyboardAvoidingView
+      style={{flex: 1}}
+      behavior="padding"
+      keyboardVerticalOffset={keyboardVerticalOffset}
+    >
+      <View style={styles.container}>
+        <Header />
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.sectionTitle}>Camera roll</Text>
-        <HorizontalAccordion />
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <Text style={styles.sectionTitle}>Camera roll</Text>
+          <HorizontalAccordion />
 
-        <Text style={styles.sectionTitle}>Legacy folders</Text>
-        <View style={styles.folderGrid}>{folders.map(renderFolderCard)}</View>
-
-        <View style={styles.progressCard}>
-          <Text style={styles.progressTitle}>Nominee Progress</Text>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, {width: '62%'}]} />
-          </View>
-          <Text style={styles.progressText}>38% left</Text>
-        </View>
-
-        <Text style={styles.sectionTitle}>Your nominees</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.nominees}
-        >
-          <TouchableOpacity style={styles.addNomineeButton}>
-            <Plus size={24} color="#666" />
-          </TouchableOpacity>
-          {nominees.map((nominee) => (
-            <Image
-              key={nominee.id}
-              source={require('@/assets/images/profile-pic.png')}
-              style={styles.nomineeAvatar}
-            />
-          ))}
-        </ScrollView>
-
-        <Text style={styles.sectionTitle}>Recents</Text>
-        <View style={styles.folderGrid}>{folders.map(renderFolderCard)}</View>
-
-        <View style={styles.storageCard}>
-          <View style={styles.storageBreakdown}>
-            {storage.breakdown.map((item) => (
-              <View key={item.type} style={styles.storageItem}>
-                <View
-                  style={[styles.storageDot, {backgroundColor: item.color}]}
-                />
-                <Text style={styles.storageType}>{item.type}</Text>
-                <Text style={styles.storageSize}>{item.size}</Text>
-              </View>
+          <Text style={styles.sectionTitle}>Legacy folders</Text>
+          <View style={styles.folderGrid}>
+            {folders.map((fold) => (
+              <Card
+                key={fold.id}
+                relation={fold.type}
+                name={fold.name}
+                photoCount={fold.photos}
+                avatarUrl={fold?.avatar || undefined}
+                backgroundColor={fold.color}
+              />
             ))}
           </View>
-          <View style={styles.storageChart}>
-            <View style={styles.storageRing}>
-              <Text style={styles.storageCurrent}>0.3 GB</Text>
-              <Text style={styles.storageTotal}>/ 1 GB</Text>
+
+          <View style={styles.progressCard}>
+            <Text style={styles.progressTitle}>Nominee Progress</Text>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, {width: '62%'}]} />
             </View>
+            <Text style={styles.progressText}>38% left</Text>
           </View>
-          <TouchableOpacity style={styles.upgradeButton}>
-            <Text style={styles.upgradeButtonText}>Upgrade storage ↑</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </View>
+
+          <Text style={styles.sectionTitle}>Your nominees</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.nominees}
+          >
+            <TouchableOpacity style={styles.addNomineeButton}>
+              <Plus size={24} color="#666" />
+            </TouchableOpacity>
+            {nominees.map((nominee) => (
+              <Image
+                key={nominee.id}
+                source={require('@/assets/images/profile-pic.png')}
+                style={styles.nomineeAvatar}
+              />
+            ))}
+          </ScrollView>
+
+          <Text style={styles.sectionTitle}>Recents</Text>
+          <View style={styles.folderGrid}>
+            {folders.map((fold) => (
+              <Card
+                key={fold.id}
+                relation={fold.type}
+                name={fold.name}
+                photoCount={fold.photos}
+                avatarUrl={fold?.avatar || undefined}
+                backgroundColor={fold.color}
+              />
+            ))}
+          </View>
+
+          <View style={styles.storageCard}>
+            <View style={styles.storageBreakdown}>
+              {storage.breakdown.map((item) => (
+                <View key={item.type} style={styles.storageItem}>
+                  <View
+                    style={[styles.storageDot, {backgroundColor: item.color}]}
+                  />
+                  <Text style={styles.storageType}>{item.type}</Text>
+                  <Text style={styles.storageSize}>{item.size}</Text>
+                </View>
+              ))}
+            </View>
+            <View style={styles.storageChart}>
+              <View style={styles.storageRing}>
+                <Text style={styles.storageCurrent}>0.3 GB</Text>
+                <Text style={styles.storageTotal}>/ 1 GB</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.upgradeButton}>
+              <Text style={styles.upgradeButtonText}>Upgrade storage ↑</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 

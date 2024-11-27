@@ -3,7 +3,7 @@ import {Tabs} from 'expo-router';
 import {Home, Folder, Plus, Edit2, User} from 'lucide-react-native';
 
 const {width} = Dimensions.get('window');
-const TAB_BAR_WIDTH = width * 0.8; // 90% of screen width
+const TAB_BAR_WIDTH = width * 0.8; // 80% of screen width
 
 import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
 
