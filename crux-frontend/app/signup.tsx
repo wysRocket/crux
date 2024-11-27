@@ -11,6 +11,8 @@ export default function SignUp() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isVerificationStep, setIsVerificationStep] = useState(false);
 
   const handleSignup = async () => {
     const success = await signup({
@@ -20,8 +22,14 @@ export default function SignUp() {
       phone,
     });
     if (success) {
-      router.push({pathname: '/verify/[phone]', params: {phone}});
+      setIsVerificationStep(true);
     }
+  };
+
+  const handleVerification = async () => {
+    // Add logic to verify the code
+    // If successful, navigate to the next screen
+    router.push({pathname: '/verify/[phone]', params: {phone}});
   };
 
   return (
@@ -30,67 +38,96 @@ export default function SignUp() {
         <Pressable onPress={() => router.canGoBack() && router.back()}>
           <ArrowLeft size={24} color="#000" />
         </Pressable>
-        <Text style={styles.progress}>1/3</Text>
+        <Text style={styles.progress}>{isVerificationStep ? '2/3' : '1/3'}</Text>
       </View>
 
-      <Text style={styles.title}>Let's get to know you!</Text>
-      <Text style={styles.subtitle}>
-        Your journey starts here — just a few quick details.
-      </Text>
-
-      <View style={styles.form}>
-        <Text style={styles.label}>Your name</Text>
-        <View style={styles.nameInputs}>
+      {isVerificationStep ? (
+        <>
+          <Text style={styles.title}>Verify your email</Text>
+          <Text style={styles.subtitle}>
+            We've sent a verification code to your email. Please enter it below.
+          </Text>
           <TextInput
-            style={[styles.input, styles.halfInput]}
-            placeholder="First name"
+            style={styles.input}
+            placeholder="Verification code"
             placeholderTextColor="#666"
-            value={firstName}
-            onChangeText={setFirstName}
+            value={verificationCode}
+            onChangeText={setVerificationCode}
           />
-          <TextInput
-            style={[styles.input, styles.halfInput]}
-            placeholder="Last name"
-            placeholderTextColor="#666"
-            value={lastName}
-            onChangeText={setLastName}
-          />
-        </View>
+          <Pressable
+            style={styles.nextButton}
+            onPress={handleVerification}
+            disabled={loading}
+          >
+            <ArrowLeft
+              size={24}
+              color="#fff"
+              style={{transform: [{rotate: '180deg'}]}}
+            />
+          </Pressable>
+        </>
+      ) : (
+        <>
+          <Text style={styles.title}>Let's get to know you!</Text>
+          <Text style={styles.subtitle}>
+            Your journey starts here — just a few quick details.
+          </Text>
 
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="yourname@crux.com"
-          placeholderTextColor="#666"
-          inputMode="email"
-          value={email}
-          onChangeText={setEmail}
-        />
+          <View style={styles.form}>
+            <Text style={styles.label}>Your name</Text>
+            <View style={styles.nameInputs}>
+              <TextInput
+                style={[styles.input, styles.halfInput]}
+                placeholder="First name"
+                placeholderTextColor="#666"
+                value={firstName}
+                onChangeText={setFirstName}
+              />
+              <TextInput
+                style={[styles.input, styles.halfInput]}
+                placeholder="Last name"
+                placeholderTextColor="#666"
+                value={lastName}
+                onChangeText={setLastName}
+              />
+            </View>
 
-        <Text style={styles.label}>Phone number</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="+1 (333) 000-0000"
-          placeholderTextColor="#666"
-          inputMode="tel"
-          value={phone}
-          onChangeText={setPhone}
-        />
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="yourname@crux.com"
+              placeholderTextColor="#666"
+              inputMode="email"
+              value={email}
+              onChangeText={setEmail}
+            />
 
-        {error && <Text style={styles.errorText}>{error}</Text>}
+            <Text style={styles.label}>Phone number</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="+1 (333) 000-0000"
+              placeholderTextColor="#666"
+              inputMode="tel"
+              value={phone}
+              onChangeText={setPhone}
+            />
 
-        <Pressable
-          style={styles.nextButton}
-          onPress={handleSignup}
-          disabled={loading}
-        >
-          <ArrowLeft
-            size={24}
-            color="#fff"
-            style={{transform: [{rotate: '180deg'}]}}
-          />
-        </Pressable>
-      </View>
+            {error && <Text style={styles.errorText}>{error}</Text>}
+
+            <Pressable
+              style={styles.nextButton}
+              onPress={handleSignup}
+              disabled={loading}
+            >
+              <ArrowLeft
+                size={24}
+                color="#fff"
+                style={{transform: [{rotate: '180deg'}]}}
+              />
+            </Pressable>
+          </View>
+        </>
+      )}
     </View>
   );
 }
