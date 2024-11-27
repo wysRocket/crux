@@ -1,12 +1,12 @@
-import { View, TextInput, Text, StyleSheet } from "react-native";
-import { inputModeOptions } from "react-native";
+import {View, TextInput, Text, StyleSheet} from 'react-native';
+import {InputModeOptions} from 'react-native';
 
 type InputProps = {
   label: string;
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
-  inputMode: inputModeOptions;
+  inputMode: InputModeOptions;
   style?: StyleSheet;
 };
 
@@ -39,11 +39,11 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 8,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   input: {
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: '#E0E0E0',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,

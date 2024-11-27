@@ -4,14 +4,14 @@ import {StyleSheet, Pressable, useColorScheme} from 'react-native';
 
 import {ThemedText} from '@/components/ThemedText';
 import {ThemedView} from '@/components/ThemedView';
-import {Colors} from '@/constants/Colors';
+import {theme} from '@/constants/Colors';
 
 export function Collapsible({
   children,
   title,
 }: PropsWithChildren & {title: string}) {
   const [isOpen, setIsOpen] = useState(false);
-  const theme = useColorScheme() ?? 'light';
+  const colorScheme = useColorScheme() ?? 'light';
 
   return (
     <ThemedView>
@@ -22,7 +22,9 @@ export function Collapsible({
         <Ionicons
           name={isOpen ? 'chevron-down' : 'chevron-forward-outline'}
           size={18}
-          color={theme === 'light' ? Colors.light.icon : Colors.dark.icon}
+          color={
+            colorScheme === 'light' ? theme.colors.accent : theme.colors.primary
+          }
         />
         <ThemedText type="defaultSemiBold">{title}</ThemedText>
       </Pressable>
