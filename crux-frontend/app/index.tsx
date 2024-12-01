@@ -8,15 +8,23 @@ export default function Login() {
   const router = useRouter();
   const {signin, loading, error} = useAuth();
   const [identifier, setIdentifier] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isVerificationStep, setIsVerificationStep] = useState(false);
 
   const handleSignin = async () => {
     const success = await signin(identifier);
     if (success) {
-      router.push({
-        pathname: '/verify/[phone]',
-        params: {phone: identifier},
-      });
+      setIsVerificationStep(true);
     }
+  };
+
+  const handleVerification = async () => {
+    // Add logic to verify the code
+    // If successful, navigate to the next screen
+    router.push({
+      pathname: '/verify/[phone]',
+      params: {phone: identifier},
+    });
   };
 
   return (
@@ -28,43 +36,68 @@ export default function Login() {
         </Text>
       </View>
 
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email or phone number"
-          placeholderTextColor="#666"
-          value={identifier}
-          onChangeText={setIdentifier}
-        />
-
-        {error && <Text style={styles.errorText}>{error}</Text>}
-
-        <Pressable
-          style={styles.signInButton}
-          onPress={handleSignin}
-          disabled={loading}
-        >
-          <Text style={styles.signInButtonText}>Sign in</Text>
-        </Pressable>
-
-        <Link href="/signup" asChild>
-          <Pressable style={styles.signUpButton}>
-            <Text style={styles.signUpButtonText}>Sign up</Text>
+      {isVerificationStep ? (
+        <>
+          <Text style={styles.title}>Verify your email</Text>
+          <Text style={styles.subtitle}>
+            We've sent a verification code to your email. Please enter it below.
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Verification code"
+            placeholderTextColor="#666"
+            value={verificationCode}
+            onChangeText={setVerificationCode}
+          />
+          <Pressable
+            style={styles.signInButton}
+            onPress={handleVerification}
+            disabled={loading}
+          >
+            <Text style={styles.signInButtonText}>Verify</Text>
           </Pressable>
-        </Link>
+        </>
+      ) : (
+        <>
+          <View style={styles.form}>
+            <TextInput
+              style={styles.input}
+              placeholder="Email or phone number"
+              placeholderTextColor="#666"
+              value={identifier}
+              onChangeText={setIdentifier}
+            />
 
-        <View style={styles.socialButtons}>
-          <Pressable style={styles.socialButton}>
-            <AntDesign name="linkedin-square" size={24} color="#0077B5" />
-          </Pressable>
-          <Pressable style={styles.socialButton}>
-            <AntDesign name="google" size={24} color="#DB4437" />
-          </Pressable>
-          <Pressable style={styles.socialButton}>
-            <AntDesign name="instagram" size={24} color="#E4405F" />
-          </Pressable>
-        </View>
-      </View>
+            {error && <Text style={styles.errorText}>{error}</Text>}
+
+            <Pressable
+              style={styles.signInButton}
+              onPress={handleSignin}
+              disabled={loading}
+            >
+              <Text style={styles.signInButtonText}>Sign in</Text>
+            </Pressable>
+
+            <Link href="/signup" asChild>
+              <Pressable style={styles.signUpButton}>
+                <Text style={styles.signUpButtonText}>Sign up</Text>
+              </Pressable>
+            </Link>
+
+            <View style={styles.socialButtons}>
+              <Pressable style={styles.socialButton}>
+                <AntDesign name="linkedin-square" size={24} color="#0077B5" />
+              </Pressable>
+              <Pressable style={styles.socialButton}>
+                <AntDesign name="google" size={24} color="#DB4437" />
+              </Pressable>
+              <Pressable style={styles.socialButton}>
+                <AntDesign name="instagram" size={24} color="#E4405F" />
+              </Pressable>
+            </View>
+          </View>
+        </>
+      )}
     </View>
   );
 }

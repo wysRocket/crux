@@ -44,7 +44,21 @@ const useAuth = () => {
             resolve(false);
             return;
           }
-          resolve(true);
+          // Handle email verification
+          if (result?.userConfirmed === false) {
+            // Send verification code to user's email
+            result.user.getAttributeVerificationCode('email', {
+              onSuccess: () => {
+                resolve(true);
+              },
+              onFailure: (err) => {
+                setError(err.message || 'Failed to send verification code');
+                resolve(false);
+              },
+            });
+          } else {
+            resolve(true);
+          }
         }
       );
     });
@@ -66,9 +80,25 @@ const useAuth = () => {
 
     return new Promise<boolean>((resolve) => {
       cognitoUser.authenticateUser(authenticationDetails, {
-        onSuccess: () => {
+        onSuccess: (session) => {
           setLoading(false);
-          resolve(true);
+          // Check if email is verified
+          cognitoUser.getUserAttributes((err, attributes) => {
+            if (err) {
+              setError(err.message || 'Failed to get user attributes');
+              resolve(false);
+              return;
+            }
+            const emailVerified = attributes?.find(
+              (attr) => attr.getName() === 'email_verified'
+            )?.getValue();
+            if (emailVerified === 'true') {
+              resolve(true);
+            } else {
+              setError('Email not verified');
+              resolve(false);
+            }
+          });
         },
         onFailure: (err) => {
           setLoading(false);
