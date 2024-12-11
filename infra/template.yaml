@@ -1,0 +1,236 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Multi-region infrastructure with Frontend, Backend, and Storage components
+
+Parameters:
+  Environment:
+    Type: String
+    Default: Production
+    AllowedValues:
+      - Development
+      - Staging
+      - Production
+
+Mappings:
+  RegionMap:
+    us-east-2:
+      NAME: US East (Ohio)
+    ap-south-1:
+      NAME: Asia Pacific (Mumbai)
+
+Resources:
+  # Authentication
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${Environment}-user-pool
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      AutoVerifiedAttributes:
+        - email
+
+  # DNS and CDN
+  Route53HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: example.com
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultCacheBehavior:
+          TargetOriginId: APIGateway
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            - PUT
+            - POST
+            - PATCH
+            - DELETE
+
+  # API Gateway and Lambda
+  ApiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub ${Environment}-api
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+            // Lambda function code
+          }
+      Runtime: nodejs18.x
+
+  # US-East-2 Region Resources
+  USEast2Resources:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: us-east-2-template.yaml
+      Parameters:
+        Environment: !Ref Environment
+
+      Resources:
+        # Load Balancer and Auto Scaling
+        ApplicationLoadBalancer:
+          Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+          Properties:
+            Scheme: internet-facing
+            SecurityGroups:
+              - !Ref ALBSecurityGroup
+            Subnets:
+              - !Ref PublicSubnet1
+              - !Ref PublicSubnet2
+
+        AutoScalingGroup:
+          Type: AWS::AutoScaling::AutoScalingGroup
+          Properties:
+            MinSize: 2
+            MaxSize: 4
+            DesiredCapacity: 2
+            LaunchTemplate:
+              LaunchTemplateId: !Ref EC2LaunchTemplate
+              Version: !GetAtt EC2LaunchTemplate.LatestVersionNumber
+
+        # EC2 Launch Template
+        EC2LaunchTemplate:
+          Type: AWS::EC2::LaunchTemplate
+          Properties:
+            LaunchTemplateData:
+              ImageId: ami-0123456789
+              InstanceType: t3.micro
+              UserData: !Base64 |
+                #!/bin/bash
+                yum update -y
+                yum install -y nginx
+                systemctl start nginx
+                systemctl enable nginx
+
+        # Monitoring
+        CloudWatchAlarm:
+          Type: AWS::CloudWatch::Alarm
+          Properties:
+            AlarmDescription: CPU utilization alarm
+            MetricName: CPUUtilization
+            Namespace: AWS/EC2
+            Statistic: Average
+            Period: 300
+            EvaluationPeriods: 2
+            Threshold: 70
+            AlarmActions:
+              - !Ref SNSTopic
+
+        SNSTopic:
+          Type: AWS::SNS::Topic
+          Properties:
+            DisplayName: EC2Notifications
+
+        # Storage
+        DynamoDBTable:
+          Type: AWS::DynamoDB::Table
+          Properties:
+            TableName: !Sub ${Environment}-table
+            AttributeDefinitions:
+              - AttributeName: id
+                AttributeType: S
+            KeySchema:
+              - AttributeName: id
+                KeyType: HASH
+            BillingMode: PAY_PER_REQUEST
+            StreamSpecification:
+              StreamViewType: NEW_AND_OLD_IMAGES
+
+        S3Bucket:
+          Type: AWS::S3::Bucket
+          Properties:
+            LifecycleConfiguration:
+              Rules:
+                - Id: TransitionToIA
+                  Status: Enabled
+                  Transitions:
+                    - StorageClass: STANDARD_IA
+                      TransitionInDays: 75
+                - Id: TransitionToGlacier
+                  Status: Enabled
+                  Transitions:
+                    - StorageClass: GLACIER
+                      TransitionInDays: 365
+
+  # AP-South-1 Region Resources
+  APSouth1Resources:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ap-south-1-template.yaml
+      Parameters:
+        Environment: !Ref Environment
+
+      Resources:
+        # Similar configuration as US-East-2 with region-specific settings
+        ApplicationLoadBalancer:
+          Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+          Properties:
+            Scheme: internet-facing
+            SecurityGroups:
+              - !Ref ALBSecurityGroup
+            Subnets:
+              - !Ref PublicSubnet1
+              - !Ref PublicSubnet2
+
+        # Replicated DynamoDB Table
+        DynamoDBTableReplica:
+          Type: AWS::DynamoDB::Table
+          Properties:
+            TableName: !Sub ${Environment}-table-replica
+            AttributeDefinitions:
+              - AttributeName: id
+                AttributeType: S
+            KeySchema:
+              - AttributeName: id
+                KeyType: HASH
+            BillingMode: PAY_PER_REQUEST
+            StreamSpecification:
+              StreamViewType: NEW_AND_OLD_IMAGES
+
+        # Replicated S3 Bucket
+        S3BucketReplica:
+          Type: AWS::S3::Bucket
+          Properties:
+            LifecycleConfiguration:
+              Rules:
+                - Id: TransitionToIA
+                  Status: Enabled
+                  Transitions:
+                    - StorageClass: STANDARD_IA
+                      TransitionInDays: 75
+                - Id: TransitionToGlacier
+                  Status: Enabled
+                  Transitions:
+                    - StorageClass: GLACIER
+                      TransitionInDays: 365
+
+Outputs:
+  ApiGatewayUrl:
+    Description: URL of the API Gateway endpoint
+    Value: !Sub https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}
+
+  CloudFrontDomain:
+    Description: Domain name of the CloudFront distribution
+    Value: !GetAtt CloudFrontDistribution.DomainName
+
+  USEast2LoadBalancerDNS:
+    Description: DNS name of the US East 2 load balancer
+    Value: !GetAtt USEast2Resources.Outputs.LoadBalancerDNS
+
+  APSouth1LoadBalancerDNS:
+    Description: DNS name of the AP South 1 load balancer
+    Value: !GetAtt APSouth1Resources.Outputs.LoadBalancerDNS

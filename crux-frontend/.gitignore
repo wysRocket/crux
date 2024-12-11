@@ -18,3 +18,10 @@ web-build/
 
 expo-env.d.ts
 # @end expo-cli
+
+android/
+ios/
+# Expo
+.expo
+dist/
+web-build/
