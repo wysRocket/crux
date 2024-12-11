@@ -2,7 +2,7 @@ import {View, Text, TextInput, Pressable, StyleSheet} from 'react-native';
 import {Link, useRouter} from 'expo-router';
 import {ArrowLeft} from 'lucide-react-native';
 import {useState} from 'react';
-import useAuth from '../hooks/useAuth';
+import {useAuth} from '@/hooks/AuthContext';
 
 export default function SignUp() {
   const router = useRouter();
@@ -18,6 +18,7 @@ export default function SignUp() {
       lastName,
       email,
       phone,
+      password: 'password',
     });
     if (success) {
       router.push({pathname: '/verify/[phone]', params: {phone}});

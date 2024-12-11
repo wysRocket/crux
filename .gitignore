@@ -4,3 +4,6 @@ infra/.terraform
 
 # macOS
 .DS_Store
+
+crux-frontend/android
+crux-frontend/ios

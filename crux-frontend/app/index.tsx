@@ -2,7 +2,7 @@ import {View, Text, TextInput, Pressable, StyleSheet} from 'react-native';
 import {Link, useRouter} from 'expo-router';
 import {AntDesign} from '@expo/vector-icons';
 import {useState} from 'react';
-import useAuth from '../hooks/useAuth';
+import {useAuth} from '@/hooks/AuthContext';
 
 export default function Login() {
   const router = useRouter();
@@ -10,7 +10,7 @@ export default function Login() {
   const [identifier, setIdentifier] = useState('');
 
   const handleSignin = async () => {
-    const success = await signin(identifier);
+    const success = await signin(identifier, 'password');
     if (success) {
       router.push({
         pathname: '/verify/[phone]',

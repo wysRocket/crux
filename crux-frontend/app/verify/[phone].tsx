@@ -1,17 +1,17 @@
-import {useLocalSearchParams, useRouter} from 'expo-router';
-import React, {useEffect, useRef, useState} from 'react';
+import {useState, useRef} from 'react';
 import {
   View,
-  Text,
-  TextInput,
   Pressable,
+  Text,
   StyleSheet,
   Dimensions,
+  TextInput,
 } from 'react-native';
+import {useRouter, useLocalSearchParams} from 'expo-router';
 import {ArrowLeft} from 'lucide-react-native';
-import {CognitoUser} from 'amazon-cognito-identity-js';
-import {userPool} from '@/cognito-config';
-import useAuth from '@/hooks/useAuth';
+import {useAuth} from '@/hooks/AuthContext';
+import {VerificationInput} from '@/components/Input';
+import {useTimer} from '@/hooks/useTimer';
 
 const {width} = Dimensions.get('window');
 const INPUT_WIDTH = (width - 140) / 6;
@@ -19,71 +19,69 @@ const INPUT_WIDTH = (width - 140) / 6;
 export default function VerifyScreen() {
   const {phone} = useLocalSearchParams();
   const router = useRouter();
-  const {verifyMFA} = useAuth();
-  const [code, setCode] = useState(['', '', '', '', '', '']);
-  const [timeLeft, setTimeLeft] = useState(29);
-  const inputRefs = useRef<Array<TextInput | null>>([]);
-  const cognitoUser = useRef<CognitoUser | null>(null);
+  const {resendConfirmationCode, confirmSignup} = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const {timeLeft, resetTimer} = useTimer(29);
 
-  useEffect(() => {
-    cognitoUser.current = new CognitoUser({
-      Username: phone as string,
-      Pool: userPool,
-    });
-  }, [phone]);
-
-  useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [timeLeft]);
+  // Add missing state and refs
+  const [code, setCode] = useState<string[]>(Array(6).fill(''));
+  const inputRefs = useRef<(TextInput | null)[]>([]);
 
   const handleCodeChange = (text: string, index: number) => {
     const newCode = [...code];
     newCode[index] = text;
     setCode(newCode);
 
-    // Move to next input if value entered
-    if (text.length === 1 && index < 5) {
+    // Auto-focus next input
+    if (text && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
-    // Move to previous input if deleted
-    if (text.length === 0 && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
 
-    // If all digits are entered, verify the code
-    if (index === 5 && text.length === 1) {
-      verifyCode([...newCode.slice(0, 5), text].join(''));
+    // Check if code is complete
+    if (newCode.every((digit) => digit) && newCode.length === 6) {
+      handleSubmit(newCode.join(''));
     }
   };
 
-  const verifyCode = async (fullCode: string) => {
-    const success = await verifyMFA(phone as string, fullCode);
-    if (success) {
-      router.push('/allset');
-    } else {
-      console.error('Verification failed');
-    }
-  };
-
-  const resendCode = () => {
-    if (!cognitoUser.current || timeLeft > 0) return;
-
-    cognitoUser.current.resendConfirmationCode((err, result) => {
-      if (err) {
-        console.error('Resend code error:', err);
-        return;
+  const handleSubmit = async (verificationCode: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const success = await confirmSignup(phone as string, verificationCode);
+      if (success) {
+        router.push('/allset');
       }
-      setTimeLeft(29);
-    });
+    } catch (err) {
+      setError('Invalid verification code. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendCode = async () => {
+    if (timeLeft > 0 || loading) return;
+
+    try {
+      setLoading(true);
+      await resendConfirmationCode(phone as string);
+      resetTimer();
+      setCode(Array(6).fill(''));
+    } catch (err) {
+      setError('Failed to resend code. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.canGoBack() && router.back()}>
+        <Pressable
+          onPress={() => router.canGoBack() && router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
           <ArrowLeft size={24} color="#000" />
         </Pressable>
         <Text style={styles.progress}>2/3</Text>
@@ -95,34 +93,30 @@ export default function VerifyScreen() {
         digits and your phone messages for the rest.
       </Text>
 
-      <View style={styles.codeContainer}>
-        {code.map((digit, index) => (
-          <React.Fragment key={index}>
-            {index === 3 && <Text style={styles.separator}>-</Text>}
-            <TextInput
-              ref={(ref) => (inputRefs.current[index] = ref)}
-              style={styles.input}
-              maxLength={1}
-              inputMode="numeric"
-              value={digit}
-              onChangeText={(text) => handleCodeChange(text, index)}
-              onKeyPress={({nativeEvent}) => {
-                if (nativeEvent.key === 'Backspace' && !digit && index > 0) {
-                  inputRefs.current[index - 1]?.focus();
-                }
-              }}
-            />
-          </React.Fragment>
-        ))}
-      </View>
+      <VerificationInput
+        code={code}
+        inputRefs={inputRefs}
+        handleCodeChange={handleCodeChange}
+      />
+
+      {error && <Text style={styles.error}>{error}</Text>}
 
       <Pressable
         onPress={resendCode}
-        disabled={timeLeft > 0}
+        disabled={timeLeft > 0 || loading}
         style={styles.resendContainer}
+        accessibilityRole="button"
+        accessibilityLabel="Resend verification code"
       >
-        <Text style={styles.resendText}>
-          Resend codes in {String(timeLeft).padStart(2, '0')}:00
+        <Text
+          style={[
+            styles.resendText,
+            (timeLeft > 0 || loading) && styles.resendTextDisabled,
+          ]}
+        >
+          {loading
+            ? 'Sending...'
+            : `Resend code in ${String(timeLeft).padStart(2, '0')}s`}
         </Text>
       </Pressable>
     </View>
@@ -157,25 +151,11 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     lineHeight: 24,
   },
-  codeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-  },
-  input: {
-    width: INPUT_WIDTH,
-    height: INPUT_WIDTH,
-    borderRadius: INPUT_WIDTH / 2,
-    backgroundColor: '#F5F5F5',
+  error: {
+    color: 'red',
+    fontSize: 14,
     textAlign: 'center',
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  separator: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginHorizontal: 8,
+    marginTop: 16,
   },
   resendContainer: {
     marginTop: 40,
@@ -184,5 +164,8 @@ const styles = StyleSheet.create({
   resendText: {
     color: '#666',
     fontSize: 14,
+  },
+  resendTextDisabled: {
+    opacity: 0.5,
   },
 });

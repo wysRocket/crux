@@ -1,16 +1,15 @@
-import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
-import { ChevronRight, Trash2 } from "lucide-react-native";
-import Header from "@/components/Header";
+import {View, Text, Pressable, StyleSheet} from 'react-native';
+import {ChevronRight, Trash2} from 'lucide-react-native';
+import Header from '@/components/Header';
 
 export default function StorageScreen() {
   const storageData = {
     used: 0.3,
     free: 0.7,
     breakdown: [
-      { type: "Video", size: "0.2MB", color: "#4A55A2" },
-      { type: "Photo", size: "0.1MB", color: "#FF4081" },
-      { type: "Files", size: "0.1MB", color: "#00C853" },
+      {type: 'Video', size: '0.2MB', color: '#4A55A2'},
+      {type: 'Photo', size: '0.1MB', color: '#FF4081'},
+      {type: 'Files', size: '0.1MB', color: '#00C853'},
     ],
   };
 
@@ -53,7 +52,7 @@ export default function StorageScreen() {
           {storageData.breakdown.map((item, index) => (
             <Pressable key={item.type} style={styles.breakdownItem}>
               <View style={styles.breakdownLeft}>
-                <View style={[styles.dot, { backgroundColor: item.color }]} />
+                <View style={[styles.dot, {backgroundColor: item.color}]} />
                 <Text style={styles.breakdownType}>{item.type}</Text>
               </View>
               <View style={styles.breakdownRight}>
@@ -80,81 +79,81 @@ export default function StorageScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: '#f8f9fa',
   },
   content: {
     padding: 16,
   },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: "#666",
+    color: '#666',
     marginBottom: 24,
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 24,
   },
   storageBar: {
     height: 8,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: '#f0f0f0',
     borderRadius: 4,
-    overflow: "hidden",
+    overflow: 'hidden',
     marginBottom: 8,
   },
   storageUsed: {
-    height: "100%",
-    backgroundColor: "#4A55A2",
+    height: '100%',
+    backgroundColor: '#4A55A2',
     borderRadius: 4,
   },
   storageInfo: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 16,
   },
   storageText: {
     fontSize: 14,
-    color: "#666",
+    color: '#666',
   },
   upgradeButton: {
-    backgroundColor: "#FF4081",
+    backgroundColor: '#FF4081',
     borderRadius: 25,
     paddingVertical: 12,
-    alignItems: "center",
+    alignItems: 'center',
   },
   upgradeButtonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   breakdownCard: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 24,
   },
   breakdownTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 16,
   },
   breakdownItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: '#f0f0f0',
   },
   breakdownLeft: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   dot: {
     width: 8,
@@ -166,34 +165,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   breakdownRight: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
   breakdownSize: {
     fontSize: 16,
-    color: "#666",
+    color: '#666',
   },
   clearCacheButton: {
-    backgroundColor: "#FFE0F0",
+    backgroundColor: '#FFE0F0',
     borderRadius: 25,
     paddingVertical: 12,
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 12,
   },
   clearCacheText: {
-    color: "#FF4081",
+    color: '#FF4081',
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   emptyTrashButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
   },
   emptyTrashText: {
-    color: "#FF4081",
+    color: '#FF4081',
     fontSize: 16,
   },
 });
